@@ -37,13 +37,11 @@
         }
         public ParkingSpot? FindFreeSpot(Vehicle vehicle)
         {
-            return Spots.FirstOrDefault(
-                s => s.CanPark(vehicle));
+            return Spots.FirstOrDefault(s => s.CanPark(vehicle));
         }
         public bool ParkVehicle(Vehicle vehicle)
         {
-            if (VehicleExists(
-                vehicle.RegistrationNumber))
+            if (VehicleExists(vehicle.RegistrationNumber))
                 return false;
 
             var spot = FindFreeSpot(vehicle);
@@ -60,8 +58,7 @@
             foreach (var spot in Spots)
             {
                 var vehicle =
-                    spot.Vehicles.FirstOrDefault(
-                    v => v.RegistrationNumber == regNumber);
+                    spot.Vehicles.FirstOrDefault(v => v.RegistrationNumber == regNumber);
 
                 if (vehicle != null)
                 {
@@ -72,9 +69,7 @@
 
             return false;
         }
-        public bool MoveVehicle(
-    string regNumber,
-    int targetSpot)
+        public bool MoveVehicle(string regNumber,int targetSpot)
         {
             var vehicle = FindVehicle(regNumber);
 
@@ -97,25 +92,22 @@
 
 
         }
-        public decimal CalculatePrice(Vehicle vehicle)
+        public decimal CalculatePrice(Vehicle vehicle,PriceList prices)
         {
-            TimeSpan parkedTime =
-                DateTime.Now - vehicle.ArrivalTime;
+            TimeSpan parkedTime = DateTime.Now - vehicle.ArrivalTime;
 
             if (parkedTime.TotalMinutes < 10)
                 return 0;
 
-            int hours =
-                (int)Math.Ceiling(parkedTime.TotalHours);
+            int hours =(int)Math.Ceiling(parkedTime.TotalHours);
+            decimal pricePerHour = vehicle is MC ? prices.McPrice : prices.CarPrice;
 
-            return hours * vehicle.HourPrice;
+            return hours * pricePerHour;
         }
 
         public ParkingSpot? FindVehicleSpot(string regNumber)
         {
-            return Spots.FirstOrDefault(
-                spot => spot.Vehicles.Any(
-                    v => v.RegistrationNumber == regNumber));
+            return Spots.FirstOrDefault(spot => spot.Vehicles.Any(v => v.RegistrationNumber == regNumber));
         }
     }
 }

@@ -1,0 +1,377 @@
+# Prague Parking v2
+
+## Om projektet
+
+Prague Parking v2 är en konsolapplikation skriven i C# för att hantera ett parkeringsgarage.
+
+Programmet använder objektorienterad programmering (OOP) med klasser för garage, parkeringsplatser och fordon. Information om garaget sparas automatiskt i en JSON-fil så att data finns kvar mellan programstarter.
+
+---
+
+## Funktioner
+
+### Sök fordon
+Sök efter fordon med registreringsnummer och få information om vilken parkeringsplats fordonet står på.
+
+### Parkera fordon
+Användaren kan parkera:
+
+- Bil (Car)
+- Motorcykel (MC)
+
+Programmet söker automatiskt efter en ledig plats.
+
+### Garageöversikt
+Garaget visas som ett interaktivt 10x10-rutnät.
+
+Färger används för att visa status:
+
+- Grön = Tom plats
+- Gul = En MC parkerad
+- Röd = Full plats
+- Blå = Markerad plats
+
+Navigering sker med piltangenter.
+
+### Flytta fordon
+Fordon kan flyttas mellan parkeringsplatser direkt från garageöversikten.
+
+### Ta bort fordon
+Fordon kan hämtas ut från garaget.
+
+Vid hämtning beräknas parkeringsavgiften automatiskt.
+
+### Automatisk lagring
+Alla ändringar sparas automatiskt till:
+
+```text
+garage.json
+```
+
+---
+
+## Klassstruktur
+
+### Vehicle
+
+Abstrakt basklass för alla fordon.
+
+Innehåller:
+
+- RegistrationNumber
+- ArrivalTime
+- Size
+- HourPrice
+
+### Car
+
+Ärver från Vehicle.
+
+Egenskaper:
+
+- Storlek: 2
+- Timpris: 20 kr
+
+### MC
+
+Ärver från Vehicle.
+
+Egenskaper:
+
+- Storlek: 1
+- Timpris: 10 kr
+
+### ParkingSpot
+
+Representerar en parkeringsplats.
+
+Ansvarar för:
+
+- Parkerade fordon
+- Storleksberäkning
+- Kontroll av ledigt utrymme
+
+### ParkingGarage
+
+Ansvarar för all logik i garaget.
+
+Metoder:
+
+- ParkVehicle()
+- FindVehicle()
+- FindVehicleSpot()
+- MoveVehicle()
+- RemoveVehicle()
+- CalculatePrice()
+
+### FileManager
+
+Ansvarar för filhantering.
+
+Metoder:
+
+- SaveGarage()
+- LoadGarage()
+
+Lagring sker via JSON-serialisering.
+
+---
+
+## Parkeringsregler
+
+### Bil
+
+- Tar upp 2 platsenheter
+- Kräver en tom parkeringsplats
+
+### MC
+
+- Tar upp 1 platsenhet
+- Två MC kan dela samma parkeringsplats
+
+### Prisberäkning
+
+- Gratis parkering under 10 minuter
+- Därefter debiteras varje påbörjad timme
+
+Bil:
+
+```text
+20 kr/timme
+```
+
+MC:
+
+```text
+10 kr/timme
+```
+
+---
+
+## Menyer
+
+### Main Menu
+
+- Search
+- Garage
+- Park Vehicle
+- Exit
+
+### Garage
+
+I garageöversikten kan användaren:
+
+- Navigera med piltangenter
+- Visa fordon på vald plats
+- Flytta fordon
+- Ta bort fordon
+- Avbryta
+
+---
+
+## Lagring
+
+Garageinformationen sparas i filen:
+
+```text
+garage.json
+```
+
+Filen läses automatiskt in när programmet startar.
+
+Om ingen sparfil finns skapas ett nytt garage med 100 parkeringsplatser.
+
+---
+
+## Teknik
+
+- C#
+- .NET
+- Objektorienterad programmering (OOP)
+- JSON-serialisering
+- Konsolgränssnitt med piltangentsnavigering
+
+---
+
+# Arbetslogg
+
+## 7 november
+
+### Arbetat med
+
+- Påbörjade projektet med en lösning baserad på en string-array.
+- Implementerade parkering av bil och MC.
+- Implementerade sökning av fordon via registreringsnummer.
+
+### Problem
+
+- Programmet var starkt beroende av stränghantering.
+- Samma logik fanns på flera ställen i koden.
+
+### Lösning
+
+- Beslutade att bygga om lösningen till en objektorienterad struktur enligt uppgiftens krav.
+
+---
+
+## 10 november
+
+### Arbetat med
+
+- Utvecklade garageöversikten.
+- Implementerade navigering med piltangenter.
+- Lade till färgkodning för parkeringsplatser.
+
+### Problem
+
+- Hantering av flera MC på samma plats.
+
+### Lösning
+
+- Byggde stöd för att flera motorcyklar kan dela parkeringsplats.
+
+---
+
+## 13 november
+
+### Arbetat med
+
+- Skapade basklassen Vehicle.
+- Skapade klasserna Car och MC.
+- Påbörjade övergången till OOP.
+
+### Problem
+
+- Befintlig logik var byggd kring strängar.
+
+### Lösning
+
+- Flyttade fordonsinformation till egna klasser.
+
+---
+
+## 16 november
+
+### Arbetat med
+
+- Skapade ParkingSpot-klassen.
+- Implementerade CanPark(), AddVehicle() och RemoveVehicle().
+
+### Problem
+
+- Parkeringsregler låg tidigare direkt i Program.cs.
+
+### Lösning
+
+- Flyttade ansvar till ParkingSpot enligt OOP-principer.
+
+---
+
+## 19 november
+
+### Arbetat med
+
+- Skapade ParkingGarage.
+- Implementerade:
+  - ParkVehicle()
+  - FindVehicle()
+  - MoveVehicle()
+  - RemoveVehicle()
+
+### Problem
+
+- Svårt att kombinera gamla menyer med ny struktur.
+
+### Lösning
+
+- Behöll användargränssnittet men bytte datalagring till objekt.
+
+---
+
+## 22 november
+
+### Arbetat med
+
+- Implementerade JSON-lagring.
+- Skapade FileManager-klassen.
+
+### Problem
+
+- Data försvann när programmet avslutades.
+
+### Lösning
+
+- Sparade garageobjektet till garage.json med JsonSerializer.
+
+---
+
+## 24 november
+
+### Arbetat med
+
+- Implementerade automatisk inläsning av sparad data vid uppstart.
+
+### Problem
+
+- Programmet behövde fungera även om ingen sparfil fanns.
+
+### Lösning
+
+- Skapade nytt garage automatiskt när ingen JSON-fil hittades.
+
+---
+
+## 26 november
+
+### Arbetat med
+
+- Byggde om garageöversikten till att använda ParkingSpot-objekt.
+- Behöll piltangentsnavigering och visuella färger.
+
+### Problem
+
+- Många metoder använde fortfarande den gamla array-lösningen.
+
+### Lösning
+
+- Ersatte gamla hjälpfunktioner med metoder i ParkingGarage och ParkingSpot.
+
+---
+
+## 27 november
+
+### Arbetat med
+
+- Slutförde flyttning av fordon.
+- Slutförde borttagning av fordon.
+- Implementerade prisberäkning.
+- Testade JSON-sparning och inläsning.
+- Integrerade den gamla garageöversikten med den nya OOP-strukturen.
+
+### Problem
+
+- Namespace-problem mellan ParkingGarage och ParkingSpot.
+- Flera metoder behövde skrivas om för att använda Vehicle-objekt.
+- Flytt- och borttagningslogiken behövde anpassas till den nya datamodellen.
+
+### Lösning
+
+- Samlade klasser i samma namespace.
+- Ersatte den gamla string-arrayen med List<ParkingSpot> och List<Vehicle>.
+- Återanvände den befintliga användarupplevelsen och garageöversikten samtidigt som datamodellen moderniserades.
+
+---
+
+## Reflektion
+
+Under projektets gång utvecklades lösningen från en procedurorienterad implementation med string-arrayer till en objektorienterad struktur med klasser för garage, parkeringsplatser och fordon.
+
+Den största utmaningen var att behålla samma användarvänliga gränssnitt samtidigt som hela datamodellen byggdes om till OOP. Resultatet blev en mer strukturerad och underhållbar applikation där ansvarsfördelningen mellan klasserna är tydligare.
+
+---
+
+## Författare
+
+Simon Setthagen
+
+Prague Parking v2 - Inlämningsuppgift

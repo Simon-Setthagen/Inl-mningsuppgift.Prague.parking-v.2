@@ -1,9 +1,14 @@
 ﻿using Data;
+using Spectre.Console;
+const int Capacity = 100;
 FileManager fileManager = new();
+PriceList prices = PriceListManager.LoadPrices();
+ParkingGarage garage = fileManager.LoadGarage() ?? new ParkingGarage(100);
 
-ParkingGarage garage =
-    fileManager.LoadGarage()
-    ?? new ParkingGarage(100);
+if (garage.Spots.Count == 0)
+{
+    garage = new ParkingGarage(100);
+}
 bool run = true;
 while (run)
 {
@@ -16,7 +21,7 @@ while (run)
             break;
 
         case 2:
-            ShowGarage();
+            Parkingspots();
             break;
 
         case 3:
@@ -32,39 +37,36 @@ while (run)
         Pause();
 }
 
-
-
-
-
-
-
-
-
-
 #region METODER
+
 int MainMenu()
 {
-    int chosemenu = 1;
+    Console.Clear();
 
-    while (true)
+    AnsiConsole.Write(new FigletText("Prague Parking").Color(Color.Yellow));
+
+    Console.WriteLine();
+
+    string choice =
+        AnsiConsole.Prompt(new SelectionPrompt<string>().Title("[yellow]Main Menu[/]")
+            .AddChoices(
+                "Search",
+                "Garage",
+                "Park vehicle",
+                "Exit"));
+
+    return choice switch
     {
-        Console.Clear();
-        Console.WriteLine("= Main menu =");
-        TypeMenychoice("Search", chosemenu == 1);
-        TypeMenychoice("Garage", chosemenu == 2);
-        TypeMenychoice("Park vehicle", chosemenu == 3);
-        TypeMenychoice("Exit", chosemenu == 4);
-
-        ConsoleKeyInfo button = Console.ReadKey(true);
-
-        if (button.Key == ConsoleKey.DownArrow && chosemenu < 4)
-            chosemenu++;
-        else if (button.Key == ConsoleKey.UpArrow && chosemenu > 1)
-            chosemenu--;
-        else if (button.Key == ConsoleKey.Enter)
-            return chosemenu;
-    }
+        "Search" => 1,
+        "Garage" => 2,
+        "Park vehicle" => 3,
+        "Exit" => 4,
+        _ => 4
+    };
 }
+
+
+
 
 void TypeMenychoice(string text, bool isChosen)
 {
@@ -81,20 +83,19 @@ void TypeMenychoice(string text, bool isChosen)
 }
 void ParkVehicle()
 {
-    Console.Clear();
+    string vehicleType =
+        AnsiConsole.Prompt(new SelectionPrompt<string>().Title("[yellow]Choose vehicle type[/]")
+            .AddChoices("CAR", "MC"));
 
-    Console.Write("Vehicle type (CAR/MC): ");
-    string type = Console.ReadLine()!
-        .Trim()
-        .ToUpper();
+    string regnumber =
+        AskRegnumber();
 
-    string regnumber = AskRegnumber();
-
-    ParkInGarage(type, regnumber);
+    ParkInGarage(
+        vehicleType,
+        regnumber);
 }
-void ParkInGarage(
-    string vehicleType,
-    string regnumber)
+
+void ParkInGarage(string vehicleType, string regnumber)
 {
     Vehicle vehicle;
 
@@ -107,8 +108,8 @@ void ParkInGarage(
     {
         fileManager.SaveGarage(garage);
 
-        ShowSuccess(
-            $"{vehicleType} {regnumber} parked");
+        AnsiConsole.Write(new Panel($"{vehicleType} {regnumber} parked").Header("Parking Successful").Border(BoxBorder.Double));
+
     }
     else
     {
@@ -129,21 +130,20 @@ void SearchVehicle()
         return;
     }
 
-    ShowSuccess(
-        $"Vehicle is parked at spot {spot.SpotNumber}");
+    AnsiConsole.Write(new Panel($"Vehicle is parked at spot {spot.SpotNumber}").Header("Search Result").Border(BoxBorder.Rounded));
 }
 string AskRegnumber()
 {
     while (true)
     {
-        Console.Write("Enter reg nr: ");
-
-        string regnumber = Console.ReadLine()?.Trim().ToUpperInvariant() ?? "";
+        string regnumber =
+            AnsiConsole.Ask<string>("[yellow]Enter reg nr:[/]").Trim().ToUpperInvariant();
 
         if (ValidRegnumber(regnumber))
             return regnumber;
 
-        ShowError("Invalid regnumber. Use letters and digits only.");
+        ShowError(
+            "Invalid regnumber. Use letters and digits only.");
     }
 }
 bool ValidRegnumber(string regnumber)
@@ -161,96 +161,337 @@ bool ValidRegnumber(string regnumber)
 }
 void Pause()
 {
-    Console.WriteLine("\nPress any key to return to main menu...");
+    AnsiConsole.MarkupLine("[grey]Press any key to continue...[/]");
     Console.ReadKey(true);
 }
+
 bool ExitProgram()
 {
     Console.Clear();
-    Console.WriteLine("Exit? (Y/N)");
+    AnsiConsole.Markup("[yellow]Exit? (Y/N)[/]");
 
     return Console.ReadKey(true).Key != ConsoleKey.Y;
 }
 
-void ShowError(string message)
-{
-    Console.ForegroundColor = ConsoleColor.Red;
-    Console.WriteLine(message);
-    Console.ResetColor();
-}
 void ShowSuccess(string message)
 {
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine(message);
-    Console.ResetColor();
-
+    AnsiConsole.MarkupLine($"[green]{message}[/]");
 }
-
-void ShowGarage()
+void ShowError(string message)
 {
-    foreach (var spot in garage.Spots)
+    AnsiConsole.MarkupLine($"[red]{message}[/]");
+}
+void Parkingspots()
+{
+    const int columns = 10;
+    int selectedSpot = 0;
+
+    while (true)
     {
-        Console.Write($"ParkingSpot: {spot.SpotNumber}: ");
+        Console.Clear();
 
-        if (!spot.Vehicles.Any())
-        {
-            Console.WriteLine("Empty");
-            continue;
-        }
+        AnsiConsole.Write(new Rule("Garage Overview").RuleStyle("yellow"));
 
-        foreach (var vehicle in spot.Vehicles)
-        {
-            Console.Write(
-                $"{vehicle.RegistrationNumber} ");
-        }
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.Write("[Empty]");
+
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.Write(" [One MC]");
+
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(" [Full]");
+
+        Console.ResetColor();
+
+        DrawInteractiveGarage(selectedSpot, -1);
 
         Console.WriteLine();
+        AnsiConsole.Write(new Panel($"Selected spot: {selectedSpot + 1}").Header("Garage").Border(BoxBorder.Rounded));
+
+        var vehicles = GetVehiclesAtSpot(selectedSpot);
+
+        if (vehicles.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[grey]Empty[/]");
+        }
+        else
+        {
+            AnsiConsole.MarkupLine("[yellow]Vehicles at spot:[/]");
+
+            foreach (var v in vehicles)
+            {
+                AnsiConsole.MarkupLine($"[green]{v.GetType().Name}[/] {v.RegistrationNumber}");
+            }
+        }
+
+        ConsoleKey key = Console.ReadKey(true).Key;
+
+        switch (key)
+        {
+            case ConsoleKey.LeftArrow:
+                if (selectedSpot % columns > 0)
+                    selectedSpot--;
+                break;
+
+            case ConsoleKey.RightArrow:
+                if (selectedSpot % columns < columns - 1 && selectedSpot + 1 < Capacity) selectedSpot++;
+                break;
+
+            case ConsoleKey.UpArrow:
+                if (selectedSpot >= columns)
+                    selectedSpot -= columns;
+                break;
+
+            case ConsoleKey.DownArrow:
+                if (selectedSpot + columns < Capacity)
+                    selectedSpot += columns;
+                break;
+
+            case ConsoleKey.Enter:
+
+                if (vehicles.Count == 0)
+                    break;
+
+                var chosen = SelectVehicleInSpot(selectedSpot);
+
+                if (chosen == null)
+                    break;
+
+                int action = 1;
+
+                while (true)
+                {
+                    Console.Clear();
+
+                    AnsiConsole.Write(new Rule($"{chosen.GetType().Name} {chosen.RegistrationNumber}").RuleStyle("green"));
+
+                    TypeMenychoice("Move vehicle", action == 1);
+                    TypeMenychoice("Remove vehicle", action == 2);
+                    TypeMenychoice("Cancel", action == 3);
+
+                    var b = Console.ReadKey(true);
+
+                    if (b.Key == ConsoleKey.DownArrow &&
+                        action < 3)
+                    {
+                        action++;
+                    }
+                    else if (b.Key == ConsoleKey.UpArrow &&
+                             action > 1)
+                    {
+                        action--;
+                    }
+                    else if (b.Key == ConsoleKey.Enter)
+                    {
+                        if (action == 1)
+                        {
+                            string vehicleType = chosen is MC ? "MC" : "CAR";
+                            int target = SelectTargetSpot(selectedSpot, vehicleType);
+
+                            if (target != -1)
+                            {
+                                garage.MoveVehicle(chosen.RegistrationNumber, target + 1);
+                                fileManager.SaveGarage(garage);
+                                ShowSuccess($"{chosen.RegistrationNumber} moved to spot {target + 1}.");
+                                Pause();
+                            }
+
+                            break;
+                        }
+
+                        else if (action == 2)
+                        {
+                            decimal price = garage.CalculatePrice(chosen, prices);
+                            garage.RemoveVehicle(chosen.RegistrationNumber);
+                            fileManager.SaveGarage(garage);
+                            ShowSuccess($"{chosen.RegistrationNumber} removed. Fee: {price} Kč");
+                            Pause();
+
+                            break;
+                        }
+
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    else if (b.Key == ConsoleKey.Escape)
+                    {
+                        break;
+                    }
+                }
+
+                break;
+
+            case ConsoleKey.Escape:
+                return;
+        }
     }
 }
-void MoveVehicle()
+
+int SelectTargetSpot(int fromSpot, string vehicleType)
 {
-    string regnumber = AskRegnumber();
+    const int columns = 10;
+    int selectedSpot = fromSpot;
 
-    Console.Write("New spot: ");
+    while (true)
+    {
+        Console.Clear();
+        Console.WriteLine("= Garage Overview =");
+        Console.WriteLine($"Vehicle: {vehicleType} | Current spot: {fromSpot + 1}");
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.Write("[Empty]");
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.Write(" [One MC]");
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(" [Full]");
+        Console.ResetColor();
 
-    if (!int.TryParse(
-        Console.ReadLine(),
-        out int target))
-    {
-        ShowError("Invalid spot.");
-        return;
-    }
 
-    if (garage.MoveVehicle(regnumber, target))
-    {
-        fileManager.SaveGarage(garage);
-        ShowSuccess("Vehicle moved.");
-    }
-    else
-    {
-        ShowError("Move failed.");
+        DrawInteractiveGarage(selectedSpot, fromSpot);
+        Console.WriteLine();
+        Console.WriteLine($"Selected spot: {selectedSpot + 1}");
+
+        if (selectedSpot == fromSpot)
+            ShowError("Choose a different spot.");
+        else if (!CanParkAtSpot(selectedSpot, vehicleType))
+            ShowError("This spot does not have room for the vehicle.");
+        else
+            ShowSuccess("Available. Press Enter to move here.");
+
+
+        ConsoleKey key = Console.ReadKey(true).Key;
+
+        switch (key)
+        {
+            case ConsoleKey.LeftArrow:
+
+                if (selectedSpot % columns > 0)
+                    selectedSpot--;
+                break;
+
+            case ConsoleKey.RightArrow:
+
+                if (selectedSpot % columns < columns - 1 && selectedSpot + 1 < Capacity)
+                    selectedSpot++;
+                break;
+
+            case ConsoleKey.UpArrow:
+
+                if (selectedSpot >= columns)
+                    selectedSpot -= columns;
+                break;
+
+            case ConsoleKey.DownArrow:
+
+                if (selectedSpot + columns < Capacity)
+                    selectedSpot += columns;
+                break;
+
+            case ConsoleKey.Enter:
+                if (selectedSpot != fromSpot && CanParkAtSpot(selectedSpot, vehicleType))
+                    return selectedSpot;
+                break;
+
+            case ConsoleKey.Escape:
+
+                return -1;
+        }
     }
 }
-void RemoveVehicle()
+void DrawInteractiveGarage(int selectedSpot, int fromSpot)
 {
-    string regnumber = AskRegnumber();
+    const int columns = 10;
 
-    var vehicle = garage.FindVehicle(regnumber);
-
-    if (vehicle == null)
+    for (int i = 0; i < Capacity; i++)
     {
-        ShowError("Vehicle not found.");
-        return;
+        int used = UsedSize(i);
+        Console.ForegroundColor = used == 0 ? ConsoleColor.Green
+                                : used == 1 ? ConsoleColor.Yellow
+                                : ConsoleColor.Red;
+
+        if (i == selectedSpot)
+        {
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.Write($">{i + 1,3}< ");
+        }
+        else if (i == fromSpot)
+        {
+            Console.Write($"*{i + 1,3}* ");
+        }
+        else
+        {
+            Console.Write($"[{i + 1,3}] ");
+        }
+
+        Console.ResetColor();
+
+        if ((i + 1) % columns == 0)
+            Console.WriteLine();
     }
+}
+Vehicle? SelectVehicleInSpot(int spot)
+{
+    var vehicles = garage.Spots[spot].Vehicles;
 
-    decimal price =
-        garage.CalculatePrice(vehicle);
+    if (!vehicles.Any())
+        return null;
 
-    garage.RemoveVehicle(regnumber);
+    int idx = 0;
 
-    fileManager.SaveGarage(garage);
+    while (true)
+    {
+        Console.Clear();
 
-    ShowSuccess(
-        $"Vehicle removed. Fee: {price} kr");
+        AnsiConsole.Write(new Rule($"Spot {spot + 1}").RuleStyle("green"));
+
+        for (int i = 0; i < vehicles.Count; i++)
+        {
+            TypeMenychoice(
+                $"{vehicles[i].GetType().Name} {vehicles[i].RegistrationNumber}",
+                idx == i);
+        }
+
+        var key = Console.ReadKey(true).Key;
+
+        if (key == ConsoleKey.DownArrow &&
+            idx < vehicles.Count - 1)
+        {
+            idx++;
+        }
+        else if (key == ConsoleKey.UpArrow && idx > 0)
+        {
+            idx--;
+        }
+        else if (key == ConsoleKey.Enter)
+        {
+            return vehicles[idx];
+        }
+        else if (key == ConsoleKey.Escape)
+        {
+            return null;
+        }
+    }
+}
+List<Vehicle> GetVehiclesAtSpot(int spot)
+{
+    return garage.Spots[spot].Vehicles;
+}
+int UsedSize(int spot)
+{
+    return garage.Spots[spot]
+        .Vehicles
+        .Sum(v => v.Size);
+}
+bool CanParkAtSpot(
+    int spot,
+    string vehicleType)
+{
+    Vehicle vehicle =
+        vehicleType == "MC"
+        ? new MC("TEMP")
+        : new Car("TEMP");
+
+    return garage.Spots[spot].CanPark(vehicle);
 }
 #endregion

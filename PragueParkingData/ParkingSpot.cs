@@ -1,34 +1,39 @@
 ﻿using Data;
-
-public class ParkingSpot
+namespace Data
 {
-    public int SpotNumber { get; set; }
-
-    public List<Vehicle> Vehicles { get; set; }
-        = new();
-
-    public ParkingSpot(int spotNumber)
+    public class ParkingSpot
     {
-        SpotNumber = spotNumber;
-    }
+        public ParkingSpot()
+        {
+        }
+        public int SpotNumber { get; set; }
 
-    public int UsedSize()
-    {
-        return Vehicles.Sum(v => v.Size);
-    }
+        public List<Vehicle> Vehicles { get; set; }
+            = new();
 
-    public bool CanPark(Vehicle vehicle)
-    {
-        return UsedSize() + vehicle.Size <= 2;
-    }
+        public ParkingSpot(int spotNumber)
+        {
+            SpotNumber = spotNumber;
+        }
 
-    public void AddVehicle(Vehicle vehicle)
-    {
-        Vehicles.Add(vehicle);
-    }
+        public int UsedSize()
+        {
+            return Vehicles.Sum(v => v.Size);
+        }
 
-    public void RemoveVehicle(Vehicle vehicle)
-    {
-        Vehicles.Remove(vehicle);
+        public bool CanPark(Vehicle vehicle)
+        {
+            return UsedSize() + vehicle.Size <= 2;
+        }
+
+        public void AddVehicle(Vehicle vehicle)
+        {
+            Vehicles.Add(vehicle);
+        }
+
+        public void RemoveVehicle(Vehicle vehicle)
+        {
+            Vehicles.Remove(vehicle);
+        }
     }
 }

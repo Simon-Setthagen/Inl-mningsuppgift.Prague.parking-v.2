@@ -1,4 +1,7 @@
 <Solution>
-  <Project Path="Inlämningsuppgift.Prague.parking v.2/Prague.parking v.2.csproj" />
-  <Project Path="PragueParkingData/Data.csproj" />
+  <Folder Name="/Solution Items/">
+    <File Path="loggbok.txt" />
+    <Project Path="Inlämningsuppgift.Prague.parking v.2/Prague.parking v.2.csproj" />
+    <Project Path="PragueParkingData/Data.csproj" />
+  </Folder>
 </Solution>

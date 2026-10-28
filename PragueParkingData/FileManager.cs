@@ -7,16 +7,11 @@ namespace Data
         public void SaveGarage(ParkingGarage garage)
         {
             string json =
-                JsonSerializer.Serialize(
-                    garage,
-                    new JsonSerializerOptions
+                JsonSerializer.Serialize(garage,new JsonSerializerOptions
                     {
                         WriteIndented = true
                     });
-
-            File.WriteAllText(
-                "garage.json",
-                json);
+            File.WriteAllText("garage.json",json);
         }
 
         public ParkingGarage? LoadGarage()
@@ -27,8 +22,7 @@ namespace Data
             string json =
                 File.ReadAllText("garage.json");
 
-            return JsonSerializer.Deserialize<ParkingGarage>(
-                json);
+            return JsonSerializer.Deserialize<ParkingGarage>(json);
         }
     }
 }
