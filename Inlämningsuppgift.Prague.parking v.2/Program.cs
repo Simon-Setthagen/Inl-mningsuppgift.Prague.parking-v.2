@@ -44,6 +44,8 @@ int MainMenu()
     Console.Clear();
 
     AnsiConsole.Write(new FigletText("Prague Parking").Color(Color.Yellow));
+    AnsiConsole.MarkupLine("[grey]Prague Parking v2[/]");
+    AnsiConsole.Write(new Panel($"Car: {prices.CarPrice} Kč/h\nMC: {prices.McPrice} Kč/h").Header("Price List").Border(BoxBorder.Rounded));
 
     Console.WriteLine();
 
@@ -191,17 +193,10 @@ void Parkingspots()
         Console.Clear();
 
         AnsiConsole.Write(new Rule("Garage Overview").RuleStyle("yellow"));
-
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.Write("[Empty]");
-
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.Write(" [One MC]");
-
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine(" [Full]");
-
-        Console.ResetColor();
+        AnsiConsole.MarkupLine(
+            "[green][Empty][/]" +
+            " [yellow][One MC][/]" +
+            " [red][Full][/]");
 
         DrawInteractiveGarage(selectedSpot, -1);
 
@@ -304,7 +299,7 @@ void Parkingspots()
                             decimal price = garage.CalculatePrice(chosen, prices);
                             garage.RemoveVehicle(chosen.RegistrationNumber);
                             fileManager.SaveGarage(garage);
-                            ShowSuccess($"{chosen.RegistrationNumber} removed. Fee: {price} Kč");
+                            AnsiConsole.Write(new Panel($"Vehicle: {chosen.RegistrationNumber}\nFee: {price} Kč").Header("Checkout").Border(BoxBorder.Double));
                             Pause();
 
                             break;
@@ -337,20 +332,16 @@ int SelectTargetSpot(int fromSpot, string vehicleType)
     while (true)
     {
         Console.Clear();
-        Console.WriteLine("= Garage Overview =");
-        Console.WriteLine($"Vehicle: {vehicleType} | Current spot: {fromSpot + 1}");
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.Write("[Empty]");
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.Write(" [One MC]");
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine(" [Full]");
-        Console.ResetColor();
-
+        AnsiConsole.Write(new Rule("Garage Overview").RuleStyle("yellow"));
+        AnsiConsole.Write(new Panel($"Vehicle: {vehicleType}\nCurrent spot: {fromSpot + 1}").Header("Move Vehicle"));
+        AnsiConsole.MarkupLine(
+            "[green][Empty][/]" +
+            " [yellow][One MC][/]" +
+            " [red][Full][/]");
 
         DrawInteractiveGarage(selectedSpot, fromSpot);
         Console.WriteLine();
-        Console.WriteLine($"Selected spot: {selectedSpot + 1}");
+        AnsiConsole.MarkupLine($"[yellow]Selected spot:[/] {selectedSpot + 1}");
 
         if (selectedSpot == fromSpot)
             ShowError("Choose a different spot.");

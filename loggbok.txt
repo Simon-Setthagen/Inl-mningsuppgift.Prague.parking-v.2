@@ -7,6 +7,17 @@ Prague Parking v2 är en konsolapplikation skriven i C# för att hantera ett par
 Programmet använder objektorienterad programmering (OOP) med klasser för garage, parkeringsplatser och fordon. Information om garaget sparas automatiskt i en JSON-fil så att data finns kvar mellan programstarter.
 
 ---
+## Användargränssnitt
+
+Programmet använder Spectre.Console för att skapa ett mer användarvänligt gränssnitt.
+
+Följande komponenter används:
+
+- FigletText för programmets titel
+- SelectionPrompt för menyer
+- Rule för rubriker
+- Panel för informationsrutor
+- Färgkodade fel- och informationsmeddelanden
 
 ## Funktioner
 
@@ -18,6 +29,13 @@ Användaren kan parkera:
 
 - Bil (Car)
 - Motorcykel (MC)
+
+## Prislista
+
+Priserna läses in från filen:
+
+```text
+PriceList.txt
 
 Programmet söker automatiskt efter en ledig plats.
 
@@ -189,7 +207,8 @@ Om ingen sparfil finns skapas ett nytt garage med 100 parkeringsplatser.
 - .NET
 - Objektorienterad programmering (OOP)
 - JSON-serialisering
-- Konsolgränssnitt med piltangentsnavigering
+- Spectre.Console
+- Konsolapplikation
 
 ---
 
@@ -321,32 +340,28 @@ Om ingen sparfil finns skapas ett nytt garage med 100 parkeringsplatser.
 
 ---
 
-## 26 november
+## 25-28 november
 
 ### Arbetat med
 
-- Byggde om garageöversikten till att använda ParkingSpot-objekt.
-- Behöll piltangentsnavigering och visuella färger.
+- Implementerat prislista via textfil.
+- Implementerat Spectre.Console.
+- Förbättrat användargränssnittet.
+- Byggt om garageöversikten till att använda ParkingSpot och Vehicle.
+- Implementerat utcheckning med parkeringsavgift i Kč.
 
 ### Problem
 
-- Många metoder använde fortfarande den gamla array-lösningen.
+- OOP-strukturen behövde integreras med den tidigare garageöversikten.
+- Namespace-problem mellan ParkingSpot och ParkingGarage.
+- JSON-deserialisering krävde parameterlösa konstruktorer.
 
-### Lösning
+### Lösningar
 
-- Ersatte gamla hjälpfunktioner med metoder i ParkingGarage och ParkingSpot.
-
----
-
-## 27 november
-
-### Arbetat med
-
-- Slutförde flyttning av fordon.
-- Slutförde borttagning av fordon.
-- Implementerade prisberäkning.
-- Testade JSON-sparning och inläsning.
-- Integrerade den gamla garageöversikten med den nya OOP-strukturen.
+- Alla parkeringsplatser lagras i List<ParkingSpot>.
+- Vehicle används som basklass för Car och MC.
+- Data sparas och laddas med JSON.
+- Priser läses in från extern textfil.
 
 ### Problem
 
@@ -364,9 +379,11 @@ Om ingen sparfil finns skapas ett nytt garage med 100 parkeringsplatser.
 
 ## Reflektion
 
-Under projektets gång utvecklades lösningen från en procedurorienterad implementation med string-arrayer till en objektorienterad struktur med klasser för garage, parkeringsplatser och fordon.
+Projektet började som en lösning baserad på arrayer och stränghantering.
 
-Den största utmaningen var att behålla samma användarvänliga gränssnitt samtidigt som hela datamodellen byggdes om till OOP. Resultatet blev en mer strukturerad och underhållbar applikation där ansvarsfördelningen mellan klasserna är tydligare.
+Under utvecklingen byggdes lösningen om till en objektorienterad modell med separata klasser för fordon, parkeringsplatser och garagehantering.
+
+Den största utmaningen var att behålla den interaktiva garageöversikten samtidigt som datalagringen flyttades från arrayer till objekt. Detta löstes genom att successivt ersätta den gamla logiken med metoder i ParkingGarage och ParkingSpot.
 
 ---
 
