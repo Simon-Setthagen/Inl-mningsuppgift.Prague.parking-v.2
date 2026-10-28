@@ -194,9 +194,9 @@ void Parkingspots()
 
         AnsiConsole.Write(new Rule("Garage Overview").RuleStyle("yellow"));
         AnsiConsole.MarkupLine(
-            "[green][Empty][/]" +
-            " [yellow][One MC][/]" +
-            " [red][Full][/]");
+            "[green][[Empty]][/]" +
+            " [yellow][[One MC]][/]" +
+            " [red][[Full]][/]");
 
         DrawInteractiveGarage(selectedSpot, -1);
 
@@ -335,9 +335,9 @@ int SelectTargetSpot(int fromSpot, string vehicleType)
         AnsiConsole.Write(new Rule("Garage Overview").RuleStyle("yellow"));
         AnsiConsole.Write(new Panel($"Vehicle: {vehicleType}\nCurrent spot: {fromSpot + 1}").Header("Move Vehicle"));
         AnsiConsole.MarkupLine(
-            "[green][Empty][/]" +
-            " [yellow][One MC][/]" +
-            " [red][Full][/]");
+            "[green][[Empty]][/]" +
+            " [yellow][[One MC]][/]" +
+            " [red][[Full]][/]");
 
         DrawInteractiveGarage(selectedSpot, fromSpot);
         Console.WriteLine();
